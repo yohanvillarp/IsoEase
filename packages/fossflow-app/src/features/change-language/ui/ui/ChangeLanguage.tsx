@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import './styles.css';
-import { supportedLanguages } from '../../i18n';
+import '@/features/change-language/ui/ChangeLanguage.css';
+import { supportedLanguages } from '@/app/providers/i18n/config';
 
 const ChangeLanguage = () => {
   const { i18n } = useTranslation();

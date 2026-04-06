@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import '@/app/styles/index.css';
 import 'react-quill-new/dist/quill.snow.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import reportWebVitals from '@/app/providers/metrics/reportWebVitals';
+import * as serviceWorkerRegistration from '@/app/providers/pwa/serviceWorkerRegistration';
 import { ErrorBoundary } from 'react-error-boundary';
-import ErrorBoundaryFallbackUI from './components/ErrorBoundary';
+import ErrorBoundaryFallbackUI from './providers/error-boundary/ErrorBoundary';
 import {I18nextProvider} from 'react-i18next';
-import i18n from './i18n';
+import i18n from '@/app/providers/i18n/config';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

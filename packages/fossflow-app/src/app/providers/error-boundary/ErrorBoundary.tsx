@@ -1,20 +1,22 @@
-import './ErrorBoundary.css';
+import '@/app/providers/error-boundary/ui/ErrorBoundary.css';
 
 interface ErrorBoundaryFallbackUIProps {
-  error: Error;
+  error: unknown;
 }
 
 export default function ErrorBoundaryFallbackUI({
   error
 }: ErrorBoundaryFallbackUIProps) {
+  const resolvedError = error instanceof Error ? error : new Error(String(error));
+
   const onRefreshButtonPressed = () => {
     window.location.reload();
   };
 
   const onReportButtonPressed = () => {
     const errorDetails = {
-      message: error.message,
-      stack: error.stack,
+      message: resolvedError.message,
+      stack: resolvedError.stack,
       userAgent: navigator.userAgent,
       url: window.location.href,
       timestamp: new Date().toISOString()
@@ -23,7 +25,7 @@ export default function ErrorBoundaryFallbackUI({
     const githubUrl = new URL(
       'https://github.com/stan-smith/FossFLOW/issues/new'
     );
-    githubUrl.searchParams.set('title', `Error: ${error.message}`);
+    githubUrl.searchParams.set('title', `Error: ${resolvedError.message}`);
     githubUrl.searchParams.set(
       'body',
       `## Error Details\n\n\`\`\`\n${JSON.stringify(errorDetails, null, 2)}\n\`\`\`\n\n## Steps to Reproduce\n1. \n2. \n3. \n\n## Expected Behavior\n\n## Actual Behavior\n\n## Environment\n- Browser: ${navigator.userAgent}\n- URL: ${window.location.href}\n- Timestamp: ${new Date().toISOString()}`
@@ -40,10 +42,10 @@ export default function ErrorBoundaryFallbackUI({
         </div>
         <div className="error-content">
           <p>
-            <strong>Error:</strong> {error.message}
+            <strong>Error:</strong> {resolvedError.message}
           </p>
-          {error.stack && (
-            <details style={{ marginTop: '10px' }}>
+          {resolvedError.stack && (
+            <details>
               <summary
                 style={{ cursor: 'pointer', fontSize: '12px', color: '#666' }}
               >
@@ -60,7 +62,7 @@ export default function ErrorBoundaryFallbackUI({
                   overflow: 'auto'
                 }}
               >
-                {error.stack}
+                {resolvedError.stack}
               </pre>
             </details>
           )}

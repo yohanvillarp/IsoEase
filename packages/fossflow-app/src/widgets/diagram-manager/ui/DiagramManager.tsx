@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { storageManager, DiagramInfo } from '../services/storageService';
+import { storageManager, DiagramInfo } from '@/shared/api/storage/storageService';
 import './DiagramManager.css';
 
 interface Props {

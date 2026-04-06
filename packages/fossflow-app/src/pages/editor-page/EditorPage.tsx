@@ -4,14 +4,14 @@ import { Isoflow } from 'fossflow';
 import { flattenCollections } from '@isoflow/isopacks/dist/utils';
 import isoflowIsopack from '@isoflow/isopacks/dist/isoflow';
 import { useTranslation } from 'react-i18next';
-import { DiagramData, mergeDiagramData, extractSavableData } from './diagramUtils';
-import { StorageManager } from './StorageManager';
-import { DiagramManager } from './components/DiagramManager';
-import { storageManager } from './services/storageService';
-import ChangeLanguage from './components/ChangeLanguage';
+import { DiagramData, mergeDiagramData, extractSavableData } from '@/shared/lib/diagram/diagramUtils';
+import { StorageManager } from '@/widgets/store-manager/ui/StorageManager';
+import { DiagramManager } from '@/widgets/diagram-manager/ui/DiagramManager';
+import { storageManager } from '@/shared/api/storage/storageService';
+import ChangeLanguage from '@/features/change-language/ui/ui/ChangeLanguage';
 import { allLocales } from 'fossflow';
-import { useIconPackManager, IconPackName } from './services/iconPackManager';
-import './App.css';
+import { useIconPackManager, IconPackName } from '@/features/icon-pack-toggle/model/iconPackManager';
+import './ui/EditorPage.css';
 
 // Load core isoflow icons (always loaded)
 const coreIcons = flattenCollections([isoflowIsopack]);
@@ -66,35 +66,24 @@ function EditorPage() {
     { id: 'red', value: '#cc0000' },
     { id: 'orange', value: '#ff6600' },
     { id: 'purple', value: '#9900cc' },
-    { id: 'grey', value: '#666666' }
+    { id: 'gray', value: '#666666' }
   ];
 
   const emptyDiagramData: DiagramData = {
-    scene: {
-      iconData: [],
-      nodeData: [],
-      connectorData: []
-    },
-    nonSceneData: {
-      properties: {
-        scale: 1,
-        scrollX: 0,
-        scrollY: 0,
-        showGrid: true,
-        showMinimap: false,
-        showSceneInspector: false
-      }
-    },
-    model: {
-      categories: [],
-      model: [],
-      connectorColors: defaultColors
-    }
+    title: 'Untitled Diagram',
+    icons: coreIcons,
+    colors: defaultColors,
+    items: [],
+    views: [],
+    fitToScreen: true
   };
 
   const [diagramData, setDiagramData] = useState<DiagramData>(emptyDiagramData);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation('app');
+
+  const currentLocale =
+    allLocales[i18n.language as keyof typeof allLocales] || allLocales['en-US'];
 
   // Load diagram for readonly mode
   useEffect(() => {
@@ -110,12 +99,12 @@ function EditorPage() {
             setDiagramData(mergedData);
             setCurrentDiagram({
               id: readonlyDiagramId,
-              name: diagramData.name || 'Diagram',
+              name: diagramData.title || 'Diagram',
               data: mergedData,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             });
-            setDiagramName(diagramData.name || 'Diagram');
+            setDiagramName(diagramData.title || 'Diagram');
             setFossflowKey(prevKey => prevKey + 1);
           }
         } catch (error) {
@@ -376,20 +365,20 @@ function EditorPage() {
       <div className="toolbar">
         {!isReadonlyUrl ? (
           <>
-            <button onClick={createNewDiagram} title={t('toolbar.new')}>
-              📄 {t('toolbar.new')}
+            <button onClick={createNewDiagram} title={t('nav.newDiagram')}>
+              📄 {t('nav.newDiagram')}
             </button>
-            <button onClick={() => setShowSaveDialog(true)} title={t('toolbar.save')}>
-              💾 {t('toolbar.save')}
+            <button onClick={() => setShowSaveDialog(true)} title={t('nav.saveSessionOnly')}>
+              💾 {t('nav.saveSessionOnly')}
             </button>
-            <button onClick={() => setShowLoadDialog(true)} title={t('toolbar.load')}>
-              📁 {t('toolbar.load')}
+            <button onClick={() => setShowLoadDialog(true)} title={t('nav.loadSessionOnly')}>
+              📁 {t('nav.loadSessionOnly')}
             </button>
-            <button onClick={() => setShowExportDialog(true)} title={t('toolbar.export')}>
-              ⬇️ {t('toolbar.export')}
+            <button onClick={() => setShowExportDialog(true)} title={t('nav.exportFile')}>
+              ⬇️ {t('nav.exportFile')}
             </button>
-            <button onClick={() => fileInputRef.current?.click()} title={t('toolbar.import')}>
-              ⬆️ {t('toolbar.import')}
+            <button onClick={() => fileInputRef.current?.click()} title={t('nav.importFile')}>
+              ⬆️ {t('nav.importFile')}
             </button>
             <input
               ref={fileInputRef}
@@ -402,11 +391,11 @@ function EditorPage() {
             {serverStorageAvailable && (
               <>
                 <div className="toolbar-separator" />
-                <button onClick={() => setShowDiagramManager(true)} title={t('toolbar.serverStorage')}>
-                  ☁️ {t('toolbar.serverStorage')}
+                <button onClick={() => setShowDiagramManager(true)} title={t('nav.serverStorage')}>
+                  ☁️ {t('nav.serverStorage')}
                 </button>
-                <button onClick={() => setShowStorageManager(true)} title={t('toolbar.storageSettings')}>
-                  ⚙️ {t('toolbar.storageSettings')}
+                <button onClick={() => setShowStorageManager(true)} title={t('nav.serverStorage')}>
+                  ⚙️ {t('nav.serverStorage')}
                 </button>
               </>
             )}
@@ -414,7 +403,7 @@ function EditorPage() {
             <div className="toolbar-separator" />
 
             <span className="diagram-info">
-              {currentDiagram ? `${t('toolbar.current')}: ${diagramName}` : t('toolbar.untitled')}
+              {currentDiagram ? `${t('status.current')}: ${diagramName}` : t('status.untitled')}
               {hasUnsavedChanges && ' *'}
             </span>
 
@@ -431,20 +420,24 @@ function EditorPage() {
         )}
 
         <div className="toolbar-right">
-          <ChangeLanguage locales={allLocales} />
+          <ChangeLanguage />
         </div>
       </div>
 
-      <div className="main-content">
+      <div className="fossflow-container">
         <Isoflow
-          key={fossflowKey}
+          key={`${fossflowKey}-${i18n.language}`}
           initialData={diagramData}
           onModelUpdated={handleModelUpdated}
           editorMode={isReadonlyUrl ? 'EXPLORABLE_READONLY' : 'EDITABLE'}
-          icons={iconPackManager.icons}
-          config={{
+          locale={currentLocale}
+          iconPackManager={{
+            lazyLoadingEnabled: iconPackManager.lazyLoadingEnabled,
+            onToggleLazyLoading: iconPackManager.toggleLazyLoading,
+            packInfo: Object.values(iconPackManager.packInfo),
+            enabledPacks: iconPackManager.enabledPacks,
             onTogglePack: (packName: string, enabled: boolean) => {
-              iconPackManager.togglePack(packName as any, enabled);
+              iconPackManager.togglePack(packName as IconPackName, enabled);
             }
           }}
         />

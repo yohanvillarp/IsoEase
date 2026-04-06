@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DiagramData } from './diagramUtils';
+import { DiagramData } from '../../../shared/lib/diagram/diagramUtils';
 
 interface PersistedDiagramData extends Omit<DiagramData, 'icons'> {
   // We omit icons from persisted data to save space

@@ -3,6 +3,7 @@
   "version": "1.10.8",
   "private": true,
   "description": "Progressive Web App for creating isometric diagrams",
+  "type": "module",
   "dependencies": {
     "@isoflow/isopacks": "^0.0.10",
     "fossflow": "*",

@@ -12,19 +12,23 @@ export const getMinimalIcons = (allIcons: any[]) => {
     'isoflow-arrow',
     'isoflow-connector'
   ];
-  
+
   // Filter to only include essential system icons
-  const minimalIcons = allIcons.filter(icon => {
+  const minimalIcons = allIcons.filter((icon) => {
     const id = icon.id?.toLowerCase() || '';
-    return essentialIconIds.some(essential => id.includes(essential));
+    return essentialIconIds.some((essential) => {
+      return id.includes(essential);
+    });
   });
-  
-  console.log(`Reduced icons from ${allIcons.length} to ${minimalIcons.length} essential icons`);
-  
+
+  console.log(
+    `Reduced icons from ${allIcons.length} to ${minimalIcons.length} essential icons`
+  );
+
   // If no essential icons found, include at least the first few icons
   if (minimalIcons.length === 0 && allIcons.length > 0) {
     return allIcons.slice(0, 10); // Fallback to first 10 icons
   }
-  
+
   return minimalIcons;
 };
